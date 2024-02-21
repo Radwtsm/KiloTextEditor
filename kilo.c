@@ -46,6 +46,13 @@ void enableRawMode(void)
   // CS8 is not a flag, it is a bit mask with multiple bits, which we set using the bitwise-OR (|) operator unlike all the flags we are turning off. It sets the character size (CS) to 8 bits per byte. On my system, it’s already set that way.
   raw.c_cflag |= (CS8);
 
+  // VMIN sets the minimum number of bytes to read before the read() function returns.
+  // We set it to zero , so the read() function returns as soon as there is an input to read
+  raw.c_cc[VMIN] = 0;
+  // VTIME sets the time that the read() function is going to wait for an input before returning 0 (it is correct as it usually returns the number of bytes received)
+  // we set it to 1/10 of a second , so 100 ms
+  raw.c_cc[VTIME] = 1;
+
   // we use our struct for setting the attributes in the terminal
   //  TCSAFLUSH, the change shall occur after all output written to fildes is transmitted, and all input so far received but not read shall be discarded before the change is made.
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
