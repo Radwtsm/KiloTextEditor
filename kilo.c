@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -7,14 +8,29 @@
 // this is where we store the original terminal attributes
 struct termios orig_termios;
 
+// Function to show errors and exit the program
+// Most C library functions that fail will set the global errno variable to indicate what the error was. perror() looks at the global errno variable and prints a descriptive error message for it.
+// We exit the program and return 1 (failure)
+void die(const char *s)
+{
+  perror(s);
+  exit(1);
+}
+
 void disableRawMode(void)
 {
+  // return error when we cannot set the attributes of stdin
+  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
+    die("tcsetattr");
   // revert to original stdin settings
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
 void enableRawMode(void)
 {
+  // return error when we cannot get the attributes of stdin
+  if (tcgetattr(STDIN_FILENO, &orig_termios) == -1)
+    die("tcgetattr");
   // get settings from terminal and saves it in "raw"
   tcgetattr(STDIN_FILENO, &orig_termios);
 
